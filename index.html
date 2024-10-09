@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--Poppins Font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Marketplace</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        background-color: white;
+      }
+      .cart_button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 70px;
+        height: 70px;
+        background-color: black;
+        border-radius: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+        transition: 0.3s transform ease-out;
+      }
+      .cart_button:hover {
+        transform: scale(1.1);
+      }
+      .cart_card {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 15px;
+        bottom: 100px;
+        right: 20px;
+        width: 600px;
+        @media (max-width: 768px) {
+          width: 300px;
+        }
+        height: 500px;
+        background-color: white;
+        border-radius: 10px;
+        border: 2px solid var(--Gray-100, #e4e7e9);
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+      }
+      .cart_card_header {
+        width: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cart_card_items {
+        width: 90%;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+      }
+      .cart_card_items_info {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        border-top: 2px solid var(--Gray-100, #e4e7e9);
+        font-size: 0.875rem; /* 14px */
+        line-height: 1.25rem; /* 20px */
+        align-items: center;
+      }
+      .cart_card_items_info p {
+        width: 33.333333%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .cart_card_items_info_title {
+        justify-content: left;
+      }
+      .cart_card_items_info button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+        color: white;
+        width: 30px;
+        height: 30px;
+        font-weight: bold;
+      }
+      .checkout_button {
+        width: 90%;
+        height: 50px;
+        font-weight: bold;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .top_bar {
+        background-color: #f8f9fa;
+        height: 50px;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+      }
+      .left_sidebar {
+        width: 250px;
+        height: 100vw;
+        padding-left: 10px;
+        border-right: 2px solid var(--Gray-100, #e4e7e9);
+        margin-top: 10px;
+        @media (max-width: 1024px) {
+          display: none;
+        }
+      }
+      .main_content {
+        display: flex;
+        width: 100vw;
+        height: fit-content;
+      }
+      .market_catalog {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .market_catalog_header {
+        height: 50px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+      }
+      .item_catalog {
+        background-color: white;
+        width: 100%;
+        height: 450px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+      .item_card {
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        height: 500px;
+        margin: 10px;
+        padding: 10px;
+        border-radius: 3px;
+        border: 2px solid var(--Gray-100, #e4e7e9);
+        background: var(--Gray-00, #fff);
+        transition: 0.3s box-shadow ease-out;
+      }
+      .item_card:hover {
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+      }
+      .item_image {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      .item_image img {
+        border-radius: 20px;
+      }
+      .item_card_info {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 10px;
+      }
+      .item_card_info p {
+        margin: 0;
+      }
+      .item_card_title {
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .item_card_price {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .item_card_rating {
+        display: flex;
+        align-items: center;
+        column-gap: 2px;
+      }
+      .item_card_button {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .item_card_button button {
+        width: 100px;
+        height: 30px;
+        background-color: black;
+        border: 1px solid #f8f9fa;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+      }
+      .quantity_buttons {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .quantity_buttons_plus_minus {
+        display: flex;
+        justify-content: space-between;
+        width: 100px;
+      }
+      .quantity_buttons_plus_minus button {
+        width: 30px;
+        height: 30px;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Cart Functionality -->
+    <button class="cart_button">
+      <img src="public/images/cart_white.svg" alt="cart" />
+    </button>
+    <section class="cart_card" style="display: none">
+      <section class="cart_card_header">
+        <h3>Your Cart</h3>
+      </section>
+      <section class="cart_card_items"></section>
+      <button class="checkout_button">Checkout</button>
+    </section>
+
+    <section class="top_bar">Marketplace_Title</section>
+    <section class="main_content">
+      <section class="left_sidebar">
+        <section class="sorting">
+          <section class="category">
+            <p>Category</p>
+          </section>
+          <section class="price">
+            <p>Price</p>
+          </section>
+          <section class="rating">
+            <p>Rating</p>
+          </section>
+        </section>
+      </section>
+      <section class="market_catalog">
+        <section class="market_catalog_header">
+          <section class="search_bar">
+            <input type="text" placeholder="Search" />
+          </section>
+        </section>
+        <section class="item_catalog" id="item_catalog"></section>
+      </section>
+    </section>
+
+    <script src="catalog.js"></script>
+  </body>
+</html>
