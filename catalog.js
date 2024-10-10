@@ -3,7 +3,7 @@ let cart = [];
 // Function to render the products in the catalog
 async function fetchProducts() {
   try {
-    const response = await fetch("https://dummyjson.com/products");
+    const response = await fetch("https://dummyjson.com/products?limit=200");
     const data = await response.json();
     const products = data.products;
 
@@ -16,7 +16,7 @@ async function fetchProducts() {
           <div class="item_image">
             <img src="${
               product.thumbnail || "https://via.placeholder.com/150"
-            }" alt="${product.title}" />
+            }" alt="${product.title}" width="150" height="150"/>
           </div>
           <div class="item_card_info">
             <p class="item_card_title">${product.title}</p>
@@ -117,6 +117,27 @@ function removeFromCart(id) {
 
   renderCart();
 }
+// Add more of the same item to cart
+function addMoreToCart(id) {
+  const itemIndex = cart.findIndex((item) => item.id === id);
+
+  if (itemIndex > -1) {
+    cart[itemIndex].quantity += 1; // Increase quantity by 1
+  }
+
+  renderCart();
+}
+
+// Function to drop all items from the cart
+function dropAllFromCart() {
+  cart = []; // Clear the cart array
+  renderCart(); // Update the cart display
+}
+
+// Attach the dropAllFromCart function to the "Drop All" button
+document
+  .getElementById("drop_all_cart_button")
+  .addEventListener("click", dropAllFromCart);
 
 // Render cart items
 function renderCart() {
@@ -136,6 +157,7 @@ function renderCart() {
         <p>$${totalPrice}</p> <!-- Display total price -->
         <p>${item.quantity}X</p>
         <button onclick="removeFromCart('${item.id}')">-</button>
+        <button onclick="addMoreToCart('${item.id}')">+</button>
       </div>
     `;
     cartItemsContainer.innerHTML += cartItem;
