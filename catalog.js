@@ -3,43 +3,63 @@ let cart = [];
 // Function to render the products in the catalog
 async function fetchProducts() {
   try {
-    const response = await fetch("https://dummyjson.com/products?limit=200");
+    const response = await fetch("https://dummyjson.com/products?limit=50");
     const data = await response.json();
     const products = data.products;
 
-    const catalog = document.getElementById("item_catalog");
-    catalog.innerHTML = ""; // Clear existing items
+    renderFilteredProducts(products); // Initial render with all products
 
-    products.forEach((product) => {
-      const productCard = `
-        <div class="item_card" id="product_${product.id}">
-          <div class="item_image">
-            <img src="${
-              product.thumbnail || "https://via.placeholder.com/150"
-            }" alt="${product.title}" width="150" height="150"/>
-          </div>
-          <div class="item_card_info">
-            <p class="item_card_title">${product.title}</p>
-            <p class="item_card_price">$${product.price}</p>
-            <div class="item_card_rating">
-              <img src="/public/images/Star.svg" alt="Star" />
-              <p>${product.rating}</p>
-            </div>
-          </div>
-          <div class="item_card_button">
-            <button id="add_button_${
-              product.id
-            }" onclick="showQuantityButtons('${product.id}', '${
-        product.title
-      }', ${product.price})">Add to Cart</button>
-          </div>
-        </div>
-      `;
-      catalog.innerHTML += productCard;
+    // Add event listener for filtering
+    document.getElementById("apply_filter").addEventListener("click", () => {
+      const filteredProducts = applyFilters(products);
+      renderFilteredProducts(filteredProducts);
     });
   } catch (error) {
     console.error("Error fetching products:", error);
   }
+}
+
+// Function to apply filters (category and price)
+function applyFilters(products) {
+  const category = document.getElementById("category_filter").value;
+  const minPrice = parseFloat(document.getElementById("min_price").value) || 0;
+  const maxPrice = parseFloat(document.getElementById("max_price").value) || Infinity;
+
+  // Cek apakah produk sesuai dengan kategori dan harga
+  return products.filter(product => {
+    const matchesCategory = category ? product.category === category : true;
+    const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+    return matchesCategory && matchesPrice;
+  });
+}
+
+
+// Function to render the products based on filters
+function renderFilteredProducts(products) {
+  const catalog = document.getElementById("item_catalog");
+  catalog.innerHTML = ""; // Clear existing items
+
+  products.forEach((product) => {
+    const productCard = `
+      <div class="item_card" id="product_${product.id}">
+        <div class="item_image">
+          <img src="${product.thumbnail || "https://via.placeholder.com/150"}" alt="${product.title}" width="150" height="150"/>
+        </div>
+        <div class="item_card_info">
+          <p class="item_card_title">${product.title}</p>
+          <p class="item_card_price">$${product.price}</p>
+          <div class="item_card_rating">
+            <img src="/public/images/Star.svg" alt="Star" />
+            <p>${product.rating}</p>
+          </div>
+        </div>
+        <div class="item_card_button">
+          <button id="add_button_${product.id}" onclick="showQuantityButtons('${product.id}', '${product.title}', ${product.price})">Add to Cart</button>
+        </div>
+      </div>
+    `;
+    catalog.innerHTML += productCard;
+  });
 }
 
 // Show plus, minus, and confirm buttons
@@ -178,3 +198,9 @@ window.onload = fetchProducts;
 
 // Event listener for cart button click
 document.querySelector(".cart_button").addEventListener("click", toggleCart);
+document.getElementById("apply_filter").addEventListener("click", () => {
+  const filteredProducts = applyFilters(products);
+  console.log("Filtered products:", filteredProducts); // Debugging log
+  renderFilteredProducts(filteredProducts);
+});
+

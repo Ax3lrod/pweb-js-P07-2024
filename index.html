@@ -284,6 +284,19 @@
 
       .categories{
         margin-left: 20px;
+        font-weight: 400;
+      }
+
+      .category{
+        font-weight: bold;
+      }
+
+      .price{
+        font-weight: bold;
+      }
+
+      .rating{
+        font-weight: bold;
       }
     </style>
   </head>
@@ -311,18 +324,32 @@
         <section class="sorting">
           <section class="category">
             <p>Category</p>
-            <div class ="categories">
-              <p>Beauty<br>Fragrances<br>Furniture<br>Groceries<br>Home-Decoration<br>Kitchen-Accessories<br>Laptops<br>Mens-shirts<br>Mens-Shoes<br>Mobile-accessories</p>
-            </div>
+            <select id="category_filter">
+              <option value="">All Categories</option>
+              <option value="fragrances">Fragrances</option>
+              <option value="beauty">Beauty</option>
+              <option value="furniture">Furniture</option>
+              <option value="groceries">Groceries</option>
+              <option value="home-decoration">Home Decoration</option>
+              <option value="kitchen-accessories">Kitchen Accessories</option>
+              <option value="laptops">Laptops</option>
+              <option value="mens-shirts">Mens Shirts</option>
+              <option value="mens-shoes">Mens Shoes</option>
+              <option value="mobile-accessories">Mobile Accessories</option>
+            </select>
           </section>
+          
           <section class="price">
-            <p>Price</p>
+            <p>Price Range</p>
+            <input type="number" id="min_price" placeholder="Min Price" />
+            <input type="number" id="max_price" placeholder="Max Price" />
           </section>
-          <section class="rating">
-            <p>Rating</p>
-          </section>
+      
+          <button id="apply_filter">Apply Filter</button>
         </section>
       </section>
+      
+      
       <section class="market_catalog">
         <section class="market_catalog_header">
           <section class="search_bar">
@@ -334,5 +361,6 @@
     </section>
 
     <script src="catalog.js"></script>
+
   </body>
 </html>
