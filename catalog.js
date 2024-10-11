@@ -17,6 +17,12 @@ async function fetchProducts(searchTerm = "") {
       const filteredProducts = applyFilters(catalogProducts);
       renderFilteredProducts(filteredProducts);
     });
+    document
+      .getElementById("apply_filter_mobile")
+      .addEventListener("click", () => {
+        const filteredProducts = applyFiltersMobile(catalogProducts);
+        renderFilteredProducts(filteredProducts);
+      });
   } catch (error) {
     console.error("Error fetching products:", error);
   }
@@ -49,6 +55,20 @@ function applyFilters(products) {
   const minPrice = parseFloat(document.getElementById("min_price").value) || 0;
   const maxPrice =
     parseFloat(document.getElementById("max_price").value) || Infinity;
+
+  return products.filter((product) => {
+    const matchesCategory = category ? product.category === category : true;
+    const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+    return matchesCategory && matchesPrice;
+  });
+}
+
+function applyFiltersMobile(products) {
+  const category = document.getElementById("category_filter_mobile").value;
+  const minPrice =
+    parseFloat(document.getElementById("min_price_mobile").value) || 0;
+  const maxPrice =
+    parseFloat(document.getElementById("max_price_mobile").value) || Infinity;
 
   return products.filter((product) => {
     const matchesCategory = category ? product.category === category : true;
@@ -279,4 +299,31 @@ document.getElementById("apply_filter").addEventListener("click", () => {
   const filteredProducts = applyFilters(products);
   console.log("Filtered products:", filteredProducts); // Debugging log
   renderFilteredProducts(filteredProducts);
+});
+document.getElementById("apply_filter_mobile").addEventListener("click", () => {
+  const filteredProducts = applyFiltersMobile(products);
+  console.log("Filtered products:", filteredProducts); // Debugging log
+  renderFilteredProducts(filteredProducts);
+});
+document
+  .getElementById("filters_mobile_button")
+  .addEventListener("click", function () {
+    const sidebar = document.getElementById("filters_mobile_sidebar");
+    sidebar.style.display = "block";
+    setTimeout(() => {
+      sidebar.classList.add("open");
+    }, 10);
+  });
+
+document.addEventListener("click", function (event) {
+  const sidebar = document.getElementById("filters_mobile_sidebar");
+  if (
+    !sidebar.contains(event.target) &&
+    !event.target.matches("#filters_mobile_button")
+  ) {
+    sidebar.classList.remove("open");
+    setTimeout(() => {
+      sidebar.style.display = "none";
+    }, 300); // Wait for the transition to finish
+  }
 });
