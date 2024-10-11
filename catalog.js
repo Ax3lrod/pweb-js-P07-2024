@@ -1,5 +1,22 @@
 let cart = [];
 let catalogProducts = []; // Store products globally
+let currentPage = 1;
+let itemsPerPage = 10; // Default items per page
+
+// Event listeners for items per page filters
+document
+  .getElementById("item_per_page")
+  .addEventListener("change", updateItemsPerPage);
+document
+  .getElementById("item_per_page_mobile")
+  .addEventListener("change", updateItemsPerPage);
+
+function updateItemsPerPage() {
+  itemsPerPage = parseInt(this.value); // Get selected items per page
+  currentPage = 1; // Reset to first page
+  const filteredProducts = applyFilters(catalogProducts); // Apply filters and update
+  renderFilteredProducts(filteredProducts);
+}
 
 // Function to render the products in the catalog
 async function fetchProducts(searchTerm = "") {
@@ -83,8 +100,13 @@ function renderFilteredProducts(products) {
     const catalog = document.getElementById("item_catalog");
     catalog.innerHTML = ""; // Clear existing items
 
+    const totalPages = Math.ceil(products.length / itemsPerPage); // Calculate total pages
+    const start = (currentPage - 1) * itemsPerPage; // Calculate starting index
+    const end = start + itemsPerPage; // Calculate ending index
+    const paginatedProducts = products.slice(start, end); // Get the products for the current page
+
     // Render the filtered or full products list
-    products.forEach((product) => {
+    paginatedProducts.forEach((product) => {
       const productCard = `
         <div class="item_card" id="product_${product.id}">
           <div class="item_image">
@@ -117,9 +139,54 @@ function renderFilteredProducts(products) {
     if (products.length === 0) {
       catalog.innerHTML = "<p>No products match your search.</p>";
     }
+
+    // Render pagination controls
+    renderPagination(totalPages);
   } catch (error) {
     console.error("Error rendering products:", error);
   }
+}
+
+// Function to render pagination controls
+function renderPagination(totalPages) {
+  const pagination = document.getElementById("pagination");
+  let paginationHTML = ""; // Store the pagination HTML here
+
+  // Create "Previous" button
+  if (currentPage > 1) {
+    paginationHTML += `<button class="pagination_button" style="padding: 10px; background-color: #333; color: white; border: none; cursor: pointer; margin-right: 5px;" onclick="changePage(${
+      currentPage - 1
+    })">Previous</button>`;
+  }
+
+  // Create page numbers
+  for (let i = 1; i <= totalPages; i++) {
+    paginationHTML += `<button class="pagination_button ${
+      i === currentPage ? "active" : ""
+    }" 
+      style="padding: 10px; background-color: ${
+        i === currentPage ? "#555" : "#333"
+      }; color: white; border: none; cursor: pointer; margin-right: 5px;"
+      onclick="changePage(${i})">${i}</button>`;
+  }
+
+  // Create "Next" button
+  if (currentPage < totalPages) {
+    paginationHTML += `<button class="pagination_button" style="padding: 10px; background-color: #333; color: white; border: none; cursor: pointer; margin-left: 5px;" onclick="changePage(${
+      currentPage + 1
+    })">Next</button>`;
+  }
+
+  // Insert the generated HTML into the pagination container
+  pagination.innerHTML = paginationHTML;
+}
+
+// Helper function to handle page changes
+function changePage(page) {
+  currentPage = page;
+  const filteredProducts = applyFilters(catalogProducts);
+  renderFilteredProducts(filteredProducts);
+  renderPagination(totalPages);
 }
 
 // Show plus, minus, and confirm buttons
@@ -156,6 +223,11 @@ function adjustQuantity(id, action, stock) {
   quantityDisplay.textContent = quantity;
 }
 
+// Function to save cart to local storage
+function saveCartToLocalStorage() {
+  localStorage.setItem("cartItems", JSON.stringify(cart));
+}
+
 // Confirm and add item to cart with selected quantity
 function confirmAddToCart(id, title, price, stock) {
   const quantity = parseInt(
@@ -185,6 +257,9 @@ function confirmAddToCart(id, title, price, stock) {
 
   renderCart();
 
+  // Save the updated cart to local storage
+  saveCartToLocalStorage();
+
   // Revert buttons back to "Add to Cart"
   const productCardButton = document.querySelector(
     `#product_${id} .item_card_button`
@@ -205,6 +280,9 @@ function removeFromCart(id) {
   }
 
   renderCart();
+
+  // Save the updated cart to local storage
+  saveCartToLocalStorage();
 }
 
 // Add more of the same item to cart
@@ -220,11 +298,15 @@ function addMoreToCart(id, stock) {
   }
 
   renderCart();
+
+  // Save the updated cart to local storage
+  saveCartToLocalStorage();
 }
 
 // Function to drop all items from the cart
 function dropAllFromCart() {
   cart = []; // Clear the cart array
+  localStorage.removeItem("cartItems"); // Clear the cart data from local storage
   renderCart(); // Update the cart display
 }
 
@@ -234,30 +316,107 @@ document
   .addEventListener("click", dropAllFromCart);
 
 // Render cart items
+// Load cart data from local storage when the page loads
+window.addEventListener("DOMContentLoaded", function () {
+  // Retrieve the saved cart data from local storage
+  const savedCart = JSON.parse(localStorage.getItem("cartItems"));
+
+  // If there's saved cart data, initialize the cart with it
+  if (savedCart) {
+    cart = savedCart;
+  }
+
+  // Render the cart upon page load
+  renderCart();
+});
+
+// Save cart data to local storage after checkout
+document
+  .getElementById("checkout_button")
+  .addEventListener("click", function () {
+    // Check if the cart is empty before proceeding
+    if (cart.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    // Mark all cart items as checked out
+    cart.forEach((item) => (item.checkedOut = true));
+
+    // Prepare the cart data to be saved in local storage
+    const cartData = cart.map((item) => ({
+      title: item.title,
+      quantity: item.quantity,
+      totalPrice: (item.price * item.quantity).toFixed(2),
+      checkedOut: item.checkedOut, // Save the checkedOut status to local storage
+      id: item.id, // Include the product ID in local storage for future reference
+    }));
+
+    // Save the cart data to local storage
+    localStorage.setItem("cartItems", JSON.stringify(cartData));
+
+    // Alert the user that checkout was successful
+    alert("Checkout successful!");
+
+    // Update the cart display to show checked out items
+    renderCart();
+  });
+
+// Function to render the cart from the stored cart data
 function renderCart() {
   const cartItemsContainer = document.querySelector(".cart_card_items");
   cartItemsContainer.innerHTML = ""; // Clear the cart items container
 
+  let totalPrice = 0; // Variable to accumulate total price
+
   if (cart.length === 0) {
     cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+    document.getElementById("total_price").textContent = totalPrice.toFixed(2); // Reset total price
     return;
   }
 
   cart.forEach((item) => {
-    const totalPrice = (item.price * item.quantity).toFixed(2); // Calculate total price for the item
+    const itemTotalPrice = (item.price * item.quantity).toFixed(2); // Calculate total price for the item
+    totalPrice += parseFloat(itemTotalPrice); // Accumulate total price
     const stock = getStockForProduct(item.id); // Get the stock for this item
+
+    // Apply different styles if the item is checked out
+    const checkedOutClass = item.checkedOut ? "checked_out" : "";
     const cartItem = `
-      <div class="cart_card_items_info">
+      <div class="cart_card_items_info ${checkedOutClass}">
         <p class="cart_card_items_info_title">${item.title}</p>
-        <p>$${totalPrice}</p> <!-- Display total price -->
+        <p>$${itemTotalPrice}</p> <!-- Display total price for this item -->
         <p>${item.quantity}X</p>
-        <button onclick="removeFromCart('${item.id}')">-</button>
-        <button onclick="addMoreToCart('${item.id}', ${stock})">+</button>
+        ${
+          item.checkedOut
+            ? '<p class="checked_out_message">Checked Out</p>' // Show this message if the item is checked out
+            : `
+          <button onclick="removeFromCart('${item.id}')">-</button>
+          <button onclick="addMoreToCart('${item.id}', ${stock})">+</button>
+        `
+        }
       </div>
     `;
     cartItemsContainer.innerHTML += cartItem;
   });
+
+  // Display the accumulated total price
+  document.getElementById("total_price").textContent = totalPrice.toFixed(2);
 }
+
+// Add a class to visually indicate checked-out items
+const style = document.createElement("style");
+style.innerHTML = `
+  .checked_out {
+    opacity: 0.6;
+    pointer-events: none; /* Prevent interaction with checked out items */
+  }
+  .checked_out_message {
+    color: green;
+    font-weight: bold;
+  }
+`;
+document.head.appendChild(style);
 
 // Toggle cart visibility
 function toggleCart() {
